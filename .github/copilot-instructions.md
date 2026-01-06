@@ -1,129 +1,166 @@
+ 
+# Instructions Copilot — local-ado (Azure DevOps LocalStack-like)
 
-# Instructions Copilot — Plan pour un service web de mock Azure DevOps
+## Contexte (ce qui existe déjà)
+Ce repo contient déjà un **MVP fonctionnel** d’un mock Azure DevOps en **Python/FastAPI**.
 
-## Objectif
-Tu dois produire **un plan d’implémentation actionnable** pour créer un service web qui **émule (mock)** un sous-ensemble de l’API REST **Azure DevOps** afin de permettre des tests/démos/développement local **sans dépendre d’Azure DevOps**.
+### Fonctionnalités déjà implémentées
+- Serveur FastAPI (`src/azure_api_mock/app.py`) + exécution `python -m azure_api_mock`.
+- Config par variables d’environnement (préfixe `ADO_MOCK_`) : `settings.py`.
+- Fixtures déterministes (`fixtures/demo.json`) chargées via `store.py`.
+- Auth simulée : `none` / `pat` (Basic) / `bearer`.
+- `api-version` (validation optionnelle) + pagination simple `top/skip`.
+- Observabilité minimale : logs JSON + `x-correlation-id`.
+- Admin : `GET /__admin/routes`, `GET /__admin/fixtures`.
+- Dockerfile + docker-compose + tests pytest + CI GitHub Actions.
 
-Le résultat attendu est un plan structuré, avec des décisions explicites, des livrables, et des critères d’acceptation.
+### Endpoints (MVP)
+- `GET /{org}/_apis/projects?api-version=...`
+- `GET /{org}/_apis/projects/{projectId}?api-version=...`
+- `GET /{org}/{project}/_apis/git/repositories?api-version=...`
+- `GET /{org}/{project}/_apis/git/repositories/{repoId}?api-version=...`
+- `GET /{org}/{project}/_apis/git/repositories/{repoId}/refs?filter=...&api-version=...`
 
-## Portée et principes
-- Le mock doit viser la **compatibilité côté client** : mêmes routes, mêmes paramètres, mêmes codes de retour, et des payloads proches de l’API ADO.
-- Le mock doit être **reproductible** : données déterministes via fixtures.
-- Le mock doit être **facile à lancer** : une commande (ou docker compose) et une URL.
-- Le mock doit être **observable** : logs, requêtes reçues, réponses renvoyées.
+## Cible (vision)
+Construire un équivalent **LocalStack-like** pour Azure DevOps : un service local “Azure DevOps-like” utilisable par :
+- Terraform / Ansible / scripts CI (IaC-first)
+- SDKs et outils (curl/http clients)
 
-## Sorties (deliverables) à produire dans le plan
-Le plan doit inclure au minimum :
-1. **Périmètre d’API** (liste des endpoints à supporter en V1) + ce qui est explicitement hors scope.
-2. **Architecture** (composants, modules, stockage des fixtures, routing, couche “comportement”).
-3. **Modèle de données** (structure des fixtures, identifiants, relations).
-4. **Authentification/autorisation** (simulée) et stratégie de validation des headers.
-5. **Gestion d’erreurs** (codes, messages, cas limites).
-6. **Stratégie de tests** (unit, intégration, contract tests) et automatisation CI.
-7. **Configuration** (ports, baseUrl, mode strict/lenient, latence simulée).
-8. **Plan de livraison** (jalons, tâches, définition du “done”).
+La priorité fonctionnelle immédiate :
+1) **Repos** (Git) : enrichir la surface API et le comportement
+2) **Pipelines** (Azure Pipelines) : endpoints nécessaires pour créer/consulter/exécuter des pipelines
+Le reste (boards/WIT, service connections, variable groups, permissions) est planifié pour des itérations suivantes.
 
-## Étapes recommandées (structure du plan)
-### 1) Définir les cas d’usage
-- Qui consomme le mock (CLI, app, tests E2E, pipelines, etc.) ?
-- Quelles opérations doivent fonctionner : lecture (GET), création (POST), mise à jour (PATCH/PUT), suppression (DELETE) ?
-- Contraintes : offline, latence simulée, datasets multiples, multi-tenant (org/projet).
+### Ressources Terraform ciblées (itération actuelle)
+Le mock doit viser en premier la compatibilité avec ces ressources du provider Terraform `microsoft/azuredevops` :
+- `azuredevops_project`
+- `azuredevops_git_repository`
+- `azuredevops_build_definition` (**moderne seulement**) : interpréter “moderne” comme **YAML pipeline** (pas de designer/classic UI), donc implémenter le strict minimum côté `/ _apis/build/definitions` utilisé pour les définitions YAML.
 
-### 2) Choisir la stratégie de mock
-Le plan doit choisir l’une (ou un mix) :
-- **Mock par contrats** : réponses basées sur OpenAPI/JSON Schema (si disponible) + validation.
-- **Mock par enregistrements** : replay de réponses capturées (cassette/VCR HTTP) avec paramétrage.
-- **Mock par comportement** : logique métier minimale (création d’ID, pagination, filtrage, transitions d’état).
+## Règles de contribution (important)
+### Compatibilité client > perfection
+- Implémenter d’abord **les endpoints réellement appelés** par les clients IaC/SDK.
+- Garder les payloads **minimaux mais suffisants** (champs consommés).
+- Respecter les conventions ADO : enveloppes `{ "count": n, "value": [...] }`, codes HTTP, erreurs JSON.
 
-### 3) Lister les endpoints ADO à supporter (V1)
-Le plan doit proposer une liste initiale réaliste, par exemple (à adapter aux besoins) :
-- **Projects** :
-	- GET `/{organization}/_apis/projects?api-version=...`
-	- GET `/{organization}/_apis/projects/{projectId}?api-version=...`
-- **Git** :
-	- GET `/{organization}/{project}/_apis/git/repositories?api-version=...`
-	- GET `/{organization}/{project}/_apis/git/repositories/{repoId}?api-version=...`
-	- GET `/{organization}/{project}/_apis/git/repositories/{repoId}/refs?filter=...&api-version=...`
-- **Build / Pipelines** (selon besoin) :
-	- GET `/{organization}/{project}/_apis/build/definitions?api-version=...`
-	- GET `/{organization}/{project}/_apis/build/builds?definitions=...&statusFilter=...&api-version=...`
-	- (ou Pipelines) GET `/{organization}/{project}/_apis/pipelines?api-version=...`
-- **Work Items (WIT)** (si requis) :
-	- POST `/{organization}/{project}/_apis/wit/wiql?api-version=...`
-	- GET `/{organization}/_apis/wit/workitems?ids=...&fields=...&api-version=...`
+### Workflow Git obligatoire (branche par fonctionnalité, commit par étape)
+Objectif : itérer vite sans perdre la traçabilité.
 
-Pour chaque endpoint du plan, préciser :
-- paramètres supportés (query/path)
-- structure de réponse (minimalement les champs utilisés par le client)
-- codes HTTP possibles (200/201/400/401/403/404/409/429/500)
-- pagination (continuation token, top/skip)
+Règles :
+- **Une branche par fonctionnalité** (ou “feature slice”), créée depuis `main`.
+  - Convention de nom : `feature/<domaine>-<sujet>` (ex: `feature/project-crud`, `feature/build-def-yaml`).
+- **Un commit par étape du todo** : chaque item du todo correspond à **au moins** 1 commit.
+  - Si un item est gros, le découper en sous-items (et donc plusieurs commits) avant de coder.
+- Chaque commit doit être :
+  - **petit**, testable, et idéalement avec tests ajoutés/ajustés dans le même commit.
+  - accompagné d’un message de commit clair suivant le style Conventional Commits.
 
-### 4) Compatibilité des détails “Azure DevOps-like”
-Inclure explicitement dans le plan :
-- support de `api-version` (accepté/validé, éventuellement mode strict)
-- headers importants (ex: `Authorization`, `Accept`, `Content-Type`)
-- enveloppes ADO fréquentes : `{ "count": n, "value": [...] }`
-- erreurs au format JSON (et éventuellement `VssServiceResponse`-like si utile)
+Conventions de message (recommandées) :
+- `feat(project): ...` / `feat(git): ...` / `feat(build): ...`
+- `test: ...`
+- `docs: ...`
+- `ci: ...`
+- `refactor: ...`
+- `chore: ...`
 
-### 5) Données : fixtures et état
-Le plan doit décider si le mock est :
-- **Stateless** (fixtures en lecture seule)
-- **Stateful** (créations/modifs en mémoire ou DB légère)
+Stratégie de merge :
+- Ouvrir une PR par branche feature.
+- Garder l’historique lisible (merge commit ou squash selon préférence, mais conserver la granularité si possible).
 
-Recommandation par défaut :
-- fixtures versionnées dans le repo (`fixtures/`), + option d’override par variable d’env
-- mode stateful via **SQLite** ou stockage fichier JSON, pour permettre POST/PATCH pendant les tests
+### Changelog et versions (obligatoire sur `main`)
+Le repo doit maintenir un `CHANGELOG.md` **mis à jour pour chaque version publiée** sur la branche `main`.
 
-Définir :
-- format des fixtures (JSON/YAML)
-- conventions d’IDs (GUID-like), noms, URLs
-- datasets (ex: `small`, `demo`, `edge-cases`)
+Règles :
+- Format : **Keep a Changelog** + **Semantic Versioning**.
+- Toute modification notable doit être ajoutée dans `## [Unreleased]` via la PR correspondante.
+- Au moment de publier une version (tag/release) :
+  - déplacer les entrées de `Unreleased` dans une section `## [x.y.z] - YYYY-MM-DD`
+  - conserver `Unreleased` vide (ou avec placeholders) pour la suite
+  - mettre à jour la version du projet (ex: `pyproject.toml`) si applicable.
 
-### 6) Architecture du service
-Le plan doit proposer une structure modulaire, par exemple :
-- `src/server` : bootstrap HTTP, middlewares
-- `src/routes` : mapping routes ADO → handlers
-- `src/handlers` : logique par domaine (projects/git/build/wit)
-- `src/store` : lecture/écriture fixtures, state management
-- `src/validation` : validation query/headers/schemas
-- `src/errors` : génération d’erreurs cohérentes
+Idéalement, automatiser plus tard (ex: release tooling) mais **ne pas bloquer** l’itération fonctionnelle.
 
+## Méthode d’itération (pour être plus performant)
+Quand tu ajoutes une capacité (endpoint, ressource Terraform, pipeline), applique ce protocole :
+
+1) **Définir la cible “client”**
+  - Quelle ressource Terraform (ou tâche Ansible) doit fonctionner ?
+  - Quels attributs le client lit/écrit ?
+
+2) **Identifier la surface API minimale**
+  - Lister les endpoints précis nécessaires (routes + query params + codes de retour).
+  - Documenter les payloads minimaux (champs réellement consommés).
+
+3) **Écrire/mettre à jour des tests d’intégration**
+  - Ajouter un test “happy path” et 1–2 edge cases (404, 409, pagination, auth).
+  - Les tests doivent reproduire un flux client (create → read → update → delete) quand applicable.
+
+4) **Implémenter le comportement**
+  - D’abord le chemin minimal (fixtures/store) puis le réalisme par itérations.
+  - Favoriser le déterminisme (IDs stables si possible).
+
+5) **Contract tests (quand ça devient utile)**
+  - Ajouter des snapshots ou JSON schema pour stabiliser les réponses.
+
+6) **Boucle rapide**
+  - Après chaque étape/commit : exécuter tests + lint (localement et via CI).
+
+### “IaC-first” (méthode de livraison)
+Pour chaque itération :
+1. Choisir **3–5 ressources IaC** cibles (Terraform provider `microsoft/azuredevops` et/ou tâches Ansible).
+2. Identifier les endpoints requis (par traces HTTP / docs / inspection du provider).
+3. Implémenter endpoints + pagination/filtrage + erreurs.
+4. Ajouter tests d’intégration + tests de contrat (snapshots ou JSON schema).
+
+## Prochaines capacités LocalStack-like (roadmap)
+Copilot doit aider à implémenter, dans cet ordre (ajuste si nécessaire) :
+
+### Itération A — Git (repos) “plus réaliste”
+- Ajouter support de nouveaux endpoints Git (exemples)
+  - branches/refs avancées, commits (si nécessaires), items (si nécessaires)
+- Ajouter pagination ADO plus réaliste (continuation token si requis par les clients)
+
+### Itération B — Pipelines
+- Supporter une API pipelines “utilisable” localement :
+  - listing pipelines, détails pipeline, runs/executions, status
+- Prévoir un moteur de simulation (runs stockés, transitions d’état).
+
+### Itération C — Record/Replay (accélérateur)
+- Ajouter un mode optionnel **record/replay** pour capturer des réponses ADO réelles (sans stocker de secrets).
+- Objectif : enrichir rapidement fixtures + comportements sans tout coder à la main.
+
+### Itération D — Mode stateful optionnel
+- Ajouter persistence SQLite optionnelle pour POST/PATCH (scénarios plus réalistes).
+
+## Qualité, CI, sécurité supply-chain (exigences)
+### Tests
+- Monter en niveau :
+  - tests d’intégration par endpoint
+  - tests “contract” (snapshots/schema)
+  - tests de compatibilité “client” (scénarios IaC/SDK)
+
+### CI complet
+Le CI doit à terme inclure :
+- tests + couverture
+- analyse statique Python (ex: ruff, mypy)
+- scans : Sonar (SonarCloud/SonarQube) + Snyk
+
+### Renovate
+- Ajouter une config Renovate pour suivi automatique des versions (Python deps + GitHub Actions + Docker).
+
+### Conteneurs
+- Les images d’exécution doivent être **light** : base slim, multi-stage si utile, pas d’outils dev dans l’image runtime.
+- Fournir un healthcheck.
+
+### Devcontainer
+- Ajouter une configuration `.devcontainer/` portable (Python + deps + tâches) pour développement local reproductible.
+
+## Documentation
+Objectif : documentation **MkDocs** compatible (ex: `mkdocs.yml` + `docs/`).
 Inclure :
-- logs structurés (JSON) + correlation id (header type `x-correlation-id`)
-- option de latence simulée et de “fault injection” (timeouts, 500, 429)
-
-### 7) Sécurité (mock)
-Le plan doit préciser :
-- acceptation d’un PAT fictif (ex: Basic base64 `:{token}`) ou Bearer
-- règles simples : token manquant → 401, token invalide → 403
-- mode “no-auth” pour local si souhaité
-
-Ne jamais demander ni stocker de secrets réels.
-
-### 8) Tests et qualité
-Inclure :
-- tests d’intégration par endpoint (supertest/pytest/httpx)
-- tests de contrats : snapshots de réponse, ou JSON schema validation
-- scénarios edge-cases : pagination vide, 404, 409 (duplicate), 429 rate limit
-- lint/format + CI
-
-### 9) Expérience développeur
-Le plan doit prévoir :
-- documentation de lancement (README), exemples curl, exemples de config client
-- healthcheck : `GET /healthz`
-- endpoint optionnel d’inspection : `GET /__admin/routes`, `GET /__admin/fixtures`
-
-## Format attendu du plan
-Rends le plan en sections claires, avec :
-- une **liste de jalons** (MVP → v1 → v2)
-- une **table** “Endpoint → statut → notes”
-- des **critères d’acceptation** mesurables (ex: “tel client passe ses tests”, “tel endpoint supporte top/skip”, etc.)
-
-## Définition du MVP (recommandation)
-Le MVP doit au minimum :
-- démarrer un serveur HTTP
-- exposer 2–4 endpoints critiques (ex: projects + repos)
-- charger des fixtures
-- gérer `api-version` + auth simple
-- fournir des réponses conformes au client (payload minimal)
+- démarrage rapide (docker/compose)
+- configuration (env)
+- endpoints supportés + exemples curl
+- guides “Terraform/Ansible” (et limitations connues)
+- contribution (comment ajouter un endpoint)
 
