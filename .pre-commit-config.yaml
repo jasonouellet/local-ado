@@ -1,0 +1,26 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+      - id: ruff-format
+
+  # markdownlint (Node) – requires node/npm available on the developer machine/devcontainer
+  - repo: local
+    hooks:
+      - id: markdownlint
+        name: markdownlint (markdownlint-cli2)
+        entry: markdownlint-cli2
+        language: system
+        types: [markdown]
+        args: ["**/*.md", "#node_modules"]
