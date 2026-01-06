@@ -1,0 +1,12 @@
+services:
+  azure-api-mock:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ADO_MOCK_FIXTURES_PATH: fixtures/demo.json
+      ADO_MOCK_DATASET: demo
+      ADO_MOCK_AUTH_MODE: none
+      ADO_MOCK_STRICT_API_VERSION: "false"
+      ADO_MOCK_ALLOWED_API_VERSIONS: "7.0,7.1-preview.1"
+      ADO_MOCK_ARTIFICIAL_LATENCY_MS: "0"

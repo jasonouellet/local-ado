@@ -1,0 +1,6 @@
+.venv/
+.terraform/
+dist/
+build/
+.pytest_cache/
+node_modules/
