@@ -80,6 +80,16 @@ Règles :
 
 Idéalement, automatiser plus tard (ex: release tooling) mais **ne pas bloquer** l’itération fonctionnelle.
 
+### Pipeline de release (SemVer) sur `main`
+Le repo utilise/va utiliser un pipeline de release automatique basé sur :
+- **Conventional Commits** → déduction du bump SemVer (major/minor/patch)
+- génération/mise à jour du `CHANGELOG.md`
+- création de tags et GitHub Releases
+
+Principe :
+- Les PR mergées dans `main` doivent avoir des commits (ou un squash title) conformes à Conventional Commits.
+- Le pipeline calcule la prochaine version et prépare/produit la release.
+
 ## Méthode d’itération (pour être plus performant)
 Quand tu ajoutes une capacité (endpoint, ressource Terraform, pipeline), applique ce protocole :
 
