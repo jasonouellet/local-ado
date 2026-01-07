@@ -1,0 +1,43 @@
+{
+  "name": "local-ado (azure-api-mock)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "dockerDashComposeVersion": "none",
+      "installDockerComposeSwitch": false
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "astral-sh.ruff",
+        "davidanson.vscode-markdownlint"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": ["-q"],
+        "editor.formatOnSave": true,
+        "ruff.nativeServer": true
+      }
+    }
+  },
+
+  "postCreateCommand": "python -m pip install --upgrade pip && pip install -e '.[dev]' && (test -d .git && pre-commit install || true)",
+
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "azure-api-mock",
+      "onAutoForward": "notify"
+    }
+  }
+}
