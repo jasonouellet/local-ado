@@ -1,8 +1,12 @@
 # azure-api-mock
 
-Service web qui mock un sous-ensemble de l’API REST **Azure DevOps**.
+Web service that mocks a subset of the **Azure DevOps** REST API.
 
-Objectif : permettre aux outils (Terraform, Ansible, scripts CI, apps) de parler à une URL “Azure DevOps-like” en local, avec des réponses déterministes.
+Goal: allow tools (Terraform, Ansible, CI scripts, apps) to talk to an “Azure DevOps-like” URL locally, with deterministic responses.
+
+Roadmap: [`ROADMAP.md`](ROADMAP.md)
+
+Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 ## Endpoints (MVP)
 
@@ -20,33 +24,33 @@ Azure DevOps-like (MVP) :
 
 ## Configuration (env)
 
-Variables clés (préfixe `ADO_MOCK_`) :
+Key variables (prefix `ADO_MOCK_`):
 
-- `FIXTURES_PATH` (défaut: `fixtures/demo.json`)
-- `AUTH_MODE` : `none` | `pat` | `bearer`
-- `TOKEN` : token attendu si auth activée
+- `FIXTURES_PATH` (default: `fixtures/demo.json`)
+- `AUTH_MODE`: `none` | `pat` | `bearer`
+- `TOKEN`: expected token when auth is enabled
 - `STRICT_API_VERSION` (bool)
 - `ALLOWED_API_VERSIONS` (csv)
 - `ARTIFICIAL_LATENCY_MS`
 
 ## Usage
 
-- Avec docker compose : démarre sur `http://localhost:8080`
-- Dataset par défaut : `demo-org` / `demo-project` / `demo-repo`
+- With docker compose: starts on `http://localhost:8080`
+- Default dataset: `demo-org` / `demo-project` / `demo-repo`
 
-### Exemple (Ansible)
+### Example (Ansible)
 
-Utilise `ansible.builtin.uri` pour valider que le mock répond :
+Use `ansible.builtin.uri` to validate that the mock responds:
 
 - URL: `http://localhost:8080/demo-org/_apis/projects?api-version=7.0`
 
-### Exemple (Terraform)
+### Example (Terraform)
 
-Si tu veux simplement consommer une réponse JSON, tu peux utiliser le data source `http`.
+If you simply want to consume a JSON response, you can use the `http` data source.
 
-⚠️ Pour le provider `microsoft/azuredevops`, tu peux tenter de pointer `org_service_url` vers le mock (ex: `http://localhost:8080/demo-org`), mais ça ne fonctionnera que si les endpoints nécessaires au provider sont implémentés.
+⚠️ For the `microsoft/azuredevops` provider, you can try pointing `org_service_url` to the mock (e.g. `http://localhost:8080/demo-org`), but it will only work for the endpoints that are implemented.
 
 ## Notes
 
-- Les réponses de liste utilisent l’enveloppe ADO : `{ "count": n, "value": [...] }`
-- Les fixtures sont versionnées et déterministes.
+- List responses use the ADO envelope: `{ "count": n, "value": [...] }`
+- Fixtures are versioned and deterministic.

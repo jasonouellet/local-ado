@@ -1,0 +1,70 @@
+name: "Bug report"
+description: "Report a bug"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filling this out. Please do **not** include secrets (tokens, PATs, etc.).
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened? What did you expect?
+      placeholder: "e.g. GET /demo-org/_apis/projects?api-version=7.0 returns 500 instead of 200"
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to reproduce.
+      placeholder: |
+        1. Start the service
+        2. curl ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / traces
+      description: Add logs or HTTP responses, ideally including `x-correlation-id`.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: Tag (if applicable) or `git rev-parse HEAD`.
+      placeholder: "e.g. 0.1.0 / abcdef1"
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python, Docker, how you run the service.
+      placeholder: |
+        - OS: Ubuntu 24.04 / WSL2
+        - Python: 3.12
+        - Docker: 29.x
+        - Run mode: docker compose / python -m azure_api_mock
+    validations:
+      required: true
