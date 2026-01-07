@@ -8,6 +8,25 @@ Roadmap: [`ROADMAP.md`](ROADMAP.md)
 
 Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
+## Dependency updates (Renovate)
+
+This repo uses Renovate to keep dependencies up to date.
+
+- Config: `renovate.json`
+- Runner: `.github/workflows/renovate.yml`
+- Schedule: Tuesday 04:00 UTC
+- Manual run: GitHub Actions → workflow "Renovate" → "Run workflow"
+
+Authentication: the workflow uses the built-in `GITHUB_TOKEN` (no additional secret required).
+
+## GitHub Actions workflows
+
+See: [`.github/workflows/README.md`](.github/workflows/README.md)
+
+- CI (lint + tests): `.github/workflows/ci.yml`
+- Releases (Release Please): `.github/workflows/release-please.yml`
+- Dependency updates (Renovate): `.github/workflows/renovate.yml`
+
 ## Endpoints (MVP)
 
 - `GET /healthz`
