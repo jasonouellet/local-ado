@@ -1,0 +1,65 @@
+name: "Feature request"
+description: "Suggest an improvement / new endpoint"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! This project is **IaC-first**: features are prioritized based on real clients (Terraform/SDK/CLI).
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What problem are you trying to solve?
+    validations:
+      required: true
+
+  - type: input
+    id: client
+    attributes:
+      label: Target client
+      description: What tool calls the API? (e.g. Terraform provider `microsoft/azuredevops`)
+      placeholder: "e.g. terraform-provider-azuredevops"
+    validations:
+      required: true
+
+  - type: textarea
+    id: endpoints
+    attributes:
+      label: Required endpoints
+      description: List the required routes/params (ideally from HTTP traces).
+      placeholder: |
+        - GET /{org}/_apis/... ?api-version=...
+        - POST /{org}/{project}/_apis/...
+    validations:
+      required: true
+
+  - type: textarea
+    id: payload
+    attributes:
+      label: Consumed payload fields
+      description: Which fields are actually read/written by the client? (minimal but sufficient)
+      placeholder: |
+        - id
+        - name
+        - url
+        - defaultBranch
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What does “done” look like?
+      placeholder: |
+        - Terraform calls X/Y succeed
+        - Responses follow ADO envelopes
+        - Integration tests added
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives / workarounds
+      description: Do you already have a workaround?

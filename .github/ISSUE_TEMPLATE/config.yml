@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security issue
+    url: https://github.com/<OWNER>/<REPO>/security/policy
+    about: Please do not open a public issue for security reports. See SECURITY.md.
+  - name: Support / question
+    url: https://github.com/<OWNER>/<REPO>/issues/new
+    about: Open an issue and include as much context as possible (see SUPPORT.md).
