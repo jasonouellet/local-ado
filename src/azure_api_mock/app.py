@@ -59,7 +59,9 @@ def check_auth(settings: Settings, authorization: str | None) -> None:
     elif mode == "bearer":
         token = parse_bearer_token(authorization)
     else:
-        raise HTTPException(status_code=500, detail=f"Invalid server auth_mode: {settings.auth_mode}")
+        raise HTTPException(
+            status_code=500, detail=f"Invalid server auth_mode: {settings.auth_mode}"
+        )
 
     if not token:
         raise HTTPException(status_code=401, detail="Invalid Authorization header")
@@ -72,7 +74,9 @@ def ado_envelope(items: list[dict[str, Any]], *, count: int | None = None) -> di
     return {"count": count if count is not None else len(items), "value": items}
 
 
-def _apply_top_skip(items: list[dict[str, Any]], top: int | None, skip: int | None) -> list[dict[str, Any]]:
+def _apply_top_skip(
+    items: list[dict[str, Any]], top: int | None, skip: int | None
+) -> list[dict[str, Any]]:
     if skip and skip > 0:
         items = items[skip:]
     if top and top >= 0:
@@ -123,14 +127,24 @@ def create_app() -> FastAPI:
         out = []
         for r in app.router.routes:
             methods = sorted(getattr(r, "methods", []) or [])
-            out.append({"path": getattr(r, "path", None), "methods": methods, "name": getattr(r, "name", None)})
+            out.append(
+                {
+                    "path": getattr(r, "path", None),
+                    "methods": methods,
+                    "name": getattr(r, "name", None),
+                }
+            )
         return {"count": len(out), "value": out}
 
     @app.get("/__admin/fixtures")
     def admin_fixtures(settings: Settings = Depends(get_settings)):
         store = FixtureStore.load(settings.fixtures_path)
         orgs = sorted((store.data.get("organizations") or {}).keys())
-        return {"dataset": settings.dataset, "fixtures_path": settings.fixtures_path, "organizations": orgs}
+        return {
+            "dataset": settings.dataset,
+            "fixtures_path": settings.fixtures_path,
+            "organizations": orgs,
+        }
 
     # --- Azure DevOps-like endpoints (MVP) ---
 

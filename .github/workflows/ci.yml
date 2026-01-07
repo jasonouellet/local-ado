@@ -17,11 +17,11 @@ jobs:
 
       - name: Install markdownlint
         run: |
-          npm install -g markdownlint-cli2
+          npm install -g markdownlint-cli2@0.20.0
 
       - name: Lint Markdown
         run: |
-          markdownlint-cli2 "**/*.md" "#node_modules"
+          markdownlint-cli2 "**/*.md" "#node_modules" --config .markdownlint.yaml
 
   test:
     runs-on: ubuntu-latest

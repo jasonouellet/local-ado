@@ -1,1 +1,3 @@
-CI workflow for azure-api-mock.
+# GitHub Actions workflows
+
+Workflows CI for `azure-api-mock` / `local-ado`.

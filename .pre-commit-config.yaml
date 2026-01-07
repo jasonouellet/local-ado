@@ -15,12 +15,9 @@ repos:
         args: ["--fix"]
       - id: ruff-format
 
-  # markdownlint (Node) – requires node/npm available on the developer machine/devcontainer
-  - repo: local
+  # markdownlint (Node) – self-contained via pre-commit (no global npm install required)
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.20.0
     hooks:
-      - id: markdownlint
-        name: markdownlint (markdownlint-cli2)
-        entry: markdownlint-cli2
-        language: system
-        types: [markdown]
-        args: ["**/*.md", "#node_modules"]
+      - id: markdownlint-cli2
+        args: ["--config", ".markdownlint.yaml"]
