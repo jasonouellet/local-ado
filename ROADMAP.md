@@ -61,6 +61,10 @@ Add optional persistence (e.g. SQLite) for POST/PATCH flows to enable more reali
 - Lint (ruff) and tests in CI
 - Optional future: dependency scanning and code scanning
 
+### Dependency updates
+
+- Renovate is used to propose automated dependency update PRs.
+
 ## How to propose roadmap items
 
 - Open an issue using the Feature Request template.

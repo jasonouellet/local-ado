@@ -55,8 +55,11 @@ We follow a “feature slice” approach:
 - **One commit per step** (small, testable) using **Conventional Commits**.
   - Examples:
     - `feat(git): add refs filtering`
+    - `fix(auth): return 401 for missing token`
     - `test: add integration test for repos list`
     - `docs: document new endpoints`
+
+Tip: prefer the standard **lowercase** prefixes (`feat:`, `fix:`, etc.). This helps automation like Release Please detect changes consistently.
 
 ## What to contribute
 

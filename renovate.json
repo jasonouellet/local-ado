@@ -1,0 +1,41 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":semanticCommitType(chore)",
+    ":semanticCommitScope(deps)",
+    "group:recommended"
+  ],
+  "labels": ["dependencies"],
+  "timezone": "UTC",
+  "schedule": [
+    "before 5am on tuesday"
+  ],
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 2,
+  "rangeStrategy": "bump",
+  "enabledManagers": [
+    "github-actions",
+    "dockerfile",
+    "pep621"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "addLabels": ["ci"],
+      "groupName": "github-actions"
+    },
+    {
+      "matchManagers": ["dockerfile"],
+      "addLabels": ["docker"],
+      "groupName": "docker"
+    },
+    {
+      "matchManagers": ["pep621"],
+      "addLabels": ["python"],
+      "groupName": "python"
+    }
+  ]
+}
