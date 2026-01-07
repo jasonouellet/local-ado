@@ -39,6 +39,7 @@ Avoid duplicating long policies or contribution details in this file. Use these 
 - **ADO conventions**: list envelopes `{ "count": n, "value": [...] }`, consistent HTTP codes, consistent JSON error shapes.
 - **Determinism**: prefer stable IDs and deterministic fixtures.
 - **Tests-first when possible**: add/adjust integration tests in `tests/` for each endpoint/behavior.
+- **Pre-commit must pass**: do not bypass validations; keep all `pre-commit` hooks passing (run `pre-commit run --all-files` after changes when possible).
 
 ## Current focus (near term)
 

@@ -35,6 +35,17 @@ A devcontainer is provided in `.devcontainer/`. In VS Code: **Reopen in Containe
 - We use `ruff` (configured in `pyproject.toml`).
 - Avoid drive-by formatting changes; keep diffs focused.
 
+## Pre-commit (required)
+
+This repository uses **pre-commit** to enforce formatting and linting consistency.
+
+Before opening a PR, ensure pre-commit checks pass locally:
+
+- Install hooks (once): `pre-commit install`
+- Run on all files: `pre-commit run --all-files`
+
+PRs are expected to keep pre-commit checks green (CI may run the same validations).
+
 ## Git workflow
 
 We follow a “feature slice” approach:
