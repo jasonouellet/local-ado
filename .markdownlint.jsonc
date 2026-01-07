@@ -1,0 +1,21 @@
+{
+  // markdownlint configuration
+  // https://github.com/DavidAnson/markdownlint
+
+  // Let prettier/formatters handle line length in the future.
+  "MD013": false,
+
+  // Allow inline HTML in docs when needed (e.g., badges).
+  "MD033": false,
+
+  // Allow duplicate headings (common in READMEs), but prefer avoiding it.
+  "MD024": {
+    "allow_different_nesting": true,
+    "siblings_only": true
+  },
+
+  // Enforce fenced code blocks and consistent style.
+  "MD046": {
+    "style": "fenced"
+  }
+}

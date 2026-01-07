@@ -11,6 +11,7 @@ Objectif : permettre aux outils (Terraform, Ansible, scripts CI, apps) de parler
 - `GET /__admin/fixtures`
 
 Azure DevOps-like (MVP) :
+
 - `GET /{organization}/_apis/projects?api-version=...`
 - `GET /{organization}/_apis/projects/{projectId}?api-version=...`
 - `GET /{organization}/{project}/_apis/git/repositories?api-version=...`
@@ -20,6 +21,7 @@ Azure DevOps-like (MVP) :
 ## Configuration (env)
 
 Variables clés (préfixe `ADO_MOCK_`) :
+
 - `FIXTURES_PATH` (défaut: `fixtures/demo.json`)
 - `AUTH_MODE` : `none` | `pat` | `bearer`
 - `TOKEN` : token attendu si auth activée
@@ -35,6 +37,7 @@ Variables clés (préfixe `ADO_MOCK_`) :
 ### Exemple (Ansible)
 
 Utilise `ansible.builtin.uri` pour valider que le mock répond :
+
 - URL: `http://localhost:8080/demo-org/_apis/projects?api-version=7.0`
 
 ### Exemple (Terraform)
